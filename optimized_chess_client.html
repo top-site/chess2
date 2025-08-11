@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess Game vs Komodo Engine</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.css">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --success-color: #27ae60;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --info-color: #3498db;
+            --light-bg: #ecf0f1;
+            --dark-text: #2c3e50;
+            --light-text: #7f8c8d;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            max-width: 800px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .header {
+            background: var(--primary-color);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 2.2rem;
+            font-weight: 300;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        .game-grid {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 20px;
+            align-items: start;
+        }
+
+        @media (max-width: 768px) {
+            .game-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+        }
+
+        .board-section {
+            text-align: center;
+        }
+
+        #board {
+            margin: 0 auto 20px;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+        }
+
+        .controls-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .card {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: var(--border-radius);
+            padding: 15px;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 0 0 15px 0;
+            color: var(--dark-text);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: var(--dark-text);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--info-color);
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        .btn {
+            background: var(--success-color);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: var(--transition);
+            display: inline-block;
+            text-align: center;
+            min-width: 120px;
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-primary { background: var(--info-color); }
+        .btn-warning { background: var(--warning-color); }
+        .btn-danger { background: var(--danger-color); }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .status-indicator {
+            padding: 15px;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: var(--transition);
+        }
+
+        .status-connected {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-disconnected {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status-thinking {
+            background: #cce7ff;
+            color: #0066cc;
+            border: 1px solid #99d6ff;
+            animation: pulse 2s infinite;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status-game-over {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        .game-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 10px;
+            background: white;
+            border-radius: var(--border-radius);
+            border: 1px solid #e9ecef;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--light-text);
+            margin-top: 2px;
+        }
+
+        .highlight-white {
+            box-shadow: inset 0 0 8px 4px rgba(255, 235, 59, 0.8) !important;
+        }
+
+        .highlight-black {
+            box-shadow: inset 0 0 8px 4px rgba(33, 150, 243, 0.8) !important;
+        }
+
+        .move-history {
+            max-height: 200px;
+            overflow-y: auto;
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: var(--border-radius);
+            padding: 10px;
+        }
+
+        .move-history::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .move-history::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .move-history::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+
+        .move-pair {
+            display: flex;
+            margin-bottom: 5px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+
+        .move-number {
+            width: 30px;
+            color: var(--light-text);
+        }
+
+        .move-white, .move-black {
+            width: 80px;
+            padding: 2px 5px;
+            border-radius: 3px;
+            margin-right: 5px;
+        }
+
+        .move-white {
+            background: #f8f9fa;
+        }
+
+        .move-black {
+            background: #e9ecef;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid var(--info-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .tooltip {
+            position: relative;
+            cursor: help;
+        }
+
+        .tooltip::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--dark-text);
+            color: white;
+            padding: 5px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            z-index: 1000;
+        }
+
+        .tooltip:hover::after {
+            opacity: 1;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: var(--border-radius);
+            color: white;
+            font-weight: 500;
+            box-shadow: var(--box-shadow);
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification-success {
+            background: var(--success-color);
+        }
+
+        .notification-error {
+            background: var(--danger-color);
+        }
+
+        .notification-info {
+            background: var(--info-color);
+        }
+
+        @media (max-width: 480px) {
+            .btn-group {
+                flex-direction: column;
+            }
+            
+            .game-stats {
+                grid-template-columns: 1fr;
+            }
+            
+            #board {
+                width: 100%;
+                height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1>Chess vs Komodo Engine</h1>
+        </div>
+        
+        <div class="content">
+            <div id="connectionStatus" class="status-indicator status-disconnected">
+                Not connected to engine
+            </div>
+
+            <div class="game-grid">
+                <div class="board-section">
+                    <div id="status" class="status-indicator">
+                        Connect to engine to start playing
+                    </div>
+                    <div id="board"></div>
+                    <div class="btn-group">
+                        <button id="newGameBtn" class="btn" disabled>New Game</button>
+                        <button id="undoBtn" class="btn btn-warning" disabled>Undo Move</button>
+                        <button id="flipBtn" class="btn btn-primary" disabled>Flip Board</button>
+                    </div>
+                </div>
+
+                <div class="controls-section">
+                    <div class="card">
+                        <h3 class="card-title">Engine Connection</h3>
+                        <div class="form-group">
+                            <label for="serverUrl">Server URL:</label>
+                            <input type="text" id="serverUrl" value="http://localhost:3001" placeholder="http://localhost:3001">
+                        </div>
+                        <button id="connectBtn" class="btn btn-primary">Connect to Engine</button>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="card-title">Game Settings</h3>
+                        <div class="form-group">
+                            <label for="difficulty" class="tooltip" data-tooltip="Higher levels play stronger">
+                                Engine Skill Level:
+                            </label>
+                            <select id="difficulty">
+                                <option value="1" selected>Level 1 - Beginner (800 ELO)</option>
+                                <option value="5">Level 5 - Casual (1200 ELO)</option>
+                                <option value="10">Level 10 - Club Player (1800 ELO)</option>
+                                <option value="15">Level 15 - Expert (2400 ELO)</option>
+                                <option value="20">Level 20 - Master (3200 ELO)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="playerColor">Play as:</label>
+                            <select id="playerColor">
+                                <option value="white" selected>White</option>
+                                <option value="black">Black</option>
+                                <option value="random">Random</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="card-title">Game Statistics</h3>
+                        <div class="game-stats">
+                            <div class="stat-item">
+                                <div class="stat-value" id="moveCount">0</div>
+                                <div class="stat-label">Moves</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="gameTime">00:00</div>
+                                <div class="stat-label">Time</div>
+                            </div>
+                        </div>
+                        <div id="engineInfo" class="form-group">
+                            <small>Engine: Not connected</small>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3 class="card-title">Move History</h3>
+                        <div class="move-history" id="moveHistory">
+                            <div style="text-align: center; color: #7f8c8d; font-style: italic;">
+                                Game not started
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include required libraries -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chessboard-js/1.0.0/chessboard-1.0.0.min.js"></script>
+    
+    <script>
+        class ChessGameApp {
+            constructor() {
+                this.board = null;
+                this.game = new Chess();
+                this.playerColor = 'white';
+                this.gameOver = false;
+                this.isComputerThinking = false;
+                this.isEngineConnected = false;
+                this.skillLevel = 1;
+                this.serverUrl = 'http://localhost:3001';
+                this.gameStartTime = null;
+                this.gameTimer = null;
+                this.moveHistory = [];
+                this.notificationTimeout = null;
+
+                // Cache DOM elements
+                this.$status = $('#status');
+                this.$engineInfo = $('#engineInfo');
+                this.$connectionStatus = $('#connectionStatus');
+                this.$moveCount = $('#moveCount');
+                this.$gameTime = $('#gameTime');
+                this.$moveHistory = $('#moveHistory');
+                this.$connectBtn = $('#connectBtn');
+                this.$newGameBtn = $('#newGameBtn');
+                this.$undoBtn = $('#undoBtn');
+                this.$flipBtn = $('#flipBtn');
+                this.$difficulty = $('#difficulty');
+                this.$playerColor = $('#playerColor');
+                this.$serverUrl = $('#serverUrl');
+
+                this.initializeGame();
+                this.bindEvents();
+            }
+
+            initializeGame() {
+                const config = {
+                    draggable: true,
+                    position: 'start',
+                    onDragStart: (source, piece) => this.onDragStart(source, piece),
+                    onDrop: (source, target) => this.onDrop(source, target),
+                    onSnapEnd: () => this.onSnapEnd(),
+                    pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png',
+                    showNotation: true
+                };
+                
+                this.board = Chessboard('board', config);
+                this.updateStatus();
+                this.updateSkillLevel();
+
+                // Try to connect on load if server URL is available
+                if (this.$serverUrl.val()) {
+                    setTimeout(() => this.connectToEngine(), 1000);
+                }
+            }
+
+            bindEvents() {
+                this.$connectBtn.on('click', () => this.connectToEngine());
+                this.$newGameBtn.on('click', () => this.newGame());
+                this.$undoBtn.on('click', () => this.undoMove());
+                this.$flipBtn.on('click', () => this.flipBoard());
+                this.$difficulty.on('change', () => this.updateSkillLevel());
+                this.$playerColor.on('change', () => this.updatePlayerColor());
+                this.$serverUrl.on('keypress', (e) => {
+                    if (e.which === 13) this.connectToEngine();
+                });
+
+                // Auto-save server URL
+                this.$serverUrl.on('input', () => {
+                    this.serverUrl = this.$serverUrl.val();
+                    localStorage.setItem('chessServerUrl', this.serverUrl);
+                });
+
+                // Load saved server URL
+                const savedUrl = localStorage.getItem('chessServerUrl');
+                if (savedUrl) {
+                    this.$serverUrl.val(savedUrl);
+                    this.serverUrl = savedUrl;
+                }
+            }
+
+            async connectToEngine() {
+                const url = this.$serverUrl.val() || this.serverUrl;
+                this.serverUrl = url;
+                
+                this.setConnectionStatus('connecting', 'Connecting to engine...');
+                this.$connectBtn.prop('disabled', true);
+
+                try {
+                    const response = await this.fetchWithTimeout(`${this.serverUrl}/api/engine/init`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ skillLevel: this.skillLevel })
+                    }, 10000);
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        this.isEngineConnected = true;
+                        this.setConnectionStatus('connected', `Connected to ${data.engine || 'Komodo Engine'}`);
+                        this.$engineInfo.html(`<small>Engine: ${data.engine || 'Komodo'} Ready (Skill Level ${this.skillLevel})</small>`);
+                        
+                        this.enableGameControls(true);
+                        this.showNotification('Engine connected successfully!', 'success');
+                        this.updateStatus();
+                    } else {
+                        throw new Error(`Server responded with ${response.status}`);
+                    }
+                } catch (error) {
+                    this.handleConnectionError(error);
+                } finally {
+                    this.$connectBtn.prop('disabled', false);
+                }
+            }
+
+            async fetchWithTimeout(url, options, timeout = 5000) {
+                const controller = new AbortController();
+                const id = setTimeout(() => controller.abort(), timeout);
+                
+                try {
+                    const response = await fetch(url, {
+                        ...options,
+                        signal: controller.signal
+                    });
+                    clearTimeout(id);
+                    return response;
+                } catch (error) {
+                    clearTimeout(id);
+                    throw error;
+                }
+            }
+
+            handleConnectionError(error) {
+                this.isEngineConnected = false;
+                const message = error.name === 'AbortError' ? 'Connection timeout' : error.message;
+                this.setConnectionStatus('disconnected', `Connection failed: ${message}`);
+                this.$engineInfo.html('<small>Engine: Connection failed</small>');
+                this.enableGameControls(false);
+                this.showNotification('Failed to connect to engine', 'error');
+                console.error('Engine connection error:', error);
+            }
+
+            setConnectionStatus(type, message) {
+                this.$connectionStatus
+                    .removeClass('status-connected status-disconnected status-thinking')
+                    .addClass(`status-${type}`)
+                    .text(message);
+            }
+
+            enableGameControls(enabled) {
+                this.$newGameBtn.prop('disabled', !enabled);
+                this.$undoBtn.prop('disabled', !enabled);
+                this.$flipBtn.prop('disabled', !enabled);
+            }
+
+            async getBestMove() {
+                if (!this.isEngineConnected) return null;
+
+                try {
+                    const response = await this.fetchWithTimeout(`${this.serverUrl}/api/engine/move`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            fen: this.game.fen(),
+                            skillLevel: this.skillLevel
+                        })
+                    }, 30000);
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        return data.move;
+                    } else {
+                        throw new Error(`Engine error: ${response.status}`);
+                    }
+                } catch (error) {
+                    console.error('Error getting move from engine:', error);
+                    this.setStatus('Engine error - try reconnecting', 'error');
+                    this.showNotification('Engine communication error', 'error');
+                    return null;
+                }
+            }
+
+            onDragStart(source, piece) {
+                if (this.game.game_over() || this.isComputerThinking || !this.isEngineConnected) {
+                    return false;
+                }
+
+                // Check if it's the player's turn and correct piece color
+                const isPlayersTurn = this.game.turn() === this.playerColor.charAt(0);
+                const isCorrectPiece = (this.game.turn() === 'w' && piece.search(/^w/) !== -1) ||
+                                    (this.game.turn() === 'b' && piece.search(/^b/) !== -1);
+
+                return isPlayersTurn && isCorrectPiece;
+            }
+
+            onDrop(source, target) {
+                if (this.isComputerThinking || !this.isEngineConnected) return 'snapback';
+                
+                this.removeHighlights();
+
+                // Try to make the move
+                const move = this.game.move({
+                    from: source,
+                    to: target,
+                    promotion: 'q' // Always promote to queen for simplicity
+                });
+
+                // Illegal move
+                if (move === null) {
+                    this.showNotification('Illegal move', 'error');
+                    return 'snapback';
+                }
+
+                // Legal move made
+                this.highlightMove(source, target, 'white');
+                this.updateMoveHistory();
+                this.updateGameStats();
+                this.updateStatus();
+
+                // Computer's turn if game not over
+                if (!this.game.game_over()) {
+                    setTimeout(() => this.makeComputerMove(), 250);
+                }
+            }
+
+            onSnapEnd() {
+                this.board.position(this.game.fen());
+            }
+
+            async makeComputerMove() {
+                if (this.game.game_over() || this.isComputerThinking || !this.isEngineConnected) return;
+
+                this.isComputerThinking = true;
+                this.setStatus('Komodo is thinking...', 'thinking');
+
+                try {
+                    const bestMove = await this.getBestMove();
+                    
+                    if (bestMove && bestMove !== '(none)') {
+                        const move = this.game.move({
+                            from: bestMove.substring(0, 2),
+                            to: bestMove.substring(2, 4),
+                            promotion: bestMove.length > 4 ? bestMove.substring(4, 5) : 'q'
+                        });
+                        
+                        if (move) {
+                            this.board.position(this.game.fen());
+                            this.highlightMove(move.from, move.to, 'black');
+                            this.updateMoveHistory();
+                            this.updateGameStats();
+                        }
+                    } else {
+                        this.setStatus('Engine failed to find a move', 'error');
+                    }
+                } catch (error) {
+                    console.error('Computer move error:', error);
+                    this.setStatus('Engine error occurred', 'error');
+                } finally {
+                    this.isComputerThinking = false;
+                    this.updateStatus();
+                }
+            }
+
+            highlightMove(from, to, color) {
+                this.removeHighlights();
+                setTimeout(() => {
+                    $(`.square-${from}`).addClass(`highlight-${color}`);
+                    $(`.square-${to}`).addClass(`highlight-${color}`);
+                }, 100);
+            }
+
+            removeHighlights() {
+                $('.square-55d63').removeClass('highlight-white highlight-black');
+            }
+
+            setStatus(message, type = '') {
+                this.$status
+                    .removeClass('status-game-over status-thinking status-error')
+                    .addClass(type ? `status-${type}` : '')
+                    .html(type === 'thinking' ? '<span class="loading-spinner"></span>' + message : message);
+            }
+
+            updateStatus() {
+                if (!this.isEngineConnected) {
+                    this.setStatus('Connect to engine to start playing', 'error');
+                    return;
+                }
+
+                if (this.game.in_checkmate()) {
+                    const winner = this.game.turn() === 'b' ? 'You win!' : 'Komodo wins!';
+                    this.setStatus(`Game over - ${winner}`, 'game-over');
+                    this.gameOver = true;
+                    this.stopGameTimer();
+                    this.showNotification(winner, winner.includes('You') ? 'success' : 'info');
+                } else if (this.game.in_draw()) {
+                    this.setStatus('Game over - Draw!', 'game-over');
+                    this.gameOver = true;
+                    this.stopGameTimer();
+                    this.showNotification('Game ended in a draw', 'info');
+                } else {
+                    const turn = this.game.turn() === this.playerColor.charAt(0) ? 'Your turn' : 'Komodo\'s turn';
+                    const check = this.game.in_check() ? 'Check - ' : '';
+                    this.setStatus(check + turn);
+                }
+            }
+
+            async newGame() {
+                if (this.isComputerThinking || !this.isEngineConnected) return;
+                
+                // Randomly assign colors if selected
+                if (this.$playerColor.val() === 'random') {
+                    this.playerColor = Math.random() < 0.5 ? 'white' : 'black';
+                }
+                
+                this.game = new Chess();
+                this.board.position('start');
+                
+                // Orient board based on player color
+                if (this.playerColor === 'black') {
+                    this.board.orientation('black');
+                } else {
+                    this.board.orientation('white');
+                }
+                
+                this.removeHighlights();
+                this.gameOver = false;
+                this.isComputerThinking = false;
+                this.moveHistory = [];
+                this.startGameTimer();
+                
+                // Reset engine for new game
+                try {
+                    await this.fetchWithTimeout(`${this.serverUrl}/api/engine/newgame`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ skillLevel: this.skillLevel })
+                    });
+                } catch (error) {
+                    console.error('New game error:', error);
+                }
+                
+                this.updateMoveHistory();
+                this.updateGameStats();
+                this.updateStatus();
+                
+                // If player is black, computer makes first move
+                if (this.playerColor === 'black') {
+                    setTimeout(() => this.makeComputerMove(), 500);
+                }
+                
+                this.showNotification('New game started!', 'success');
+            }
+
+            undoMove() {
+                if (this.isComputerThinking || !this.isEngineConnected || this.game.history().length < 2) {
+                    return;
+                }
+                
+                this.game.undo(); // Undo computer's move
+                this.game.undo(); // Undo player's move
+                
+                this.board.position(this.game.fen());
+                this.removeHighlights();
+                this.updateMoveHistory();
+                this.updateGameStats();
+                this.updateStatus();
+                this.showNotification('Move undone', 'info');
+            }
+
+            flipBoard() {
+                if (this.isComputerThinking) return;
+                this.board.flip();
+            }
+
+            updatePlayerColor() {
+                const newColor = this.$playerColor.val();
+                if (newColor !== 'random') {
+                    this.playerColor = newColor;
+                }
+            }
+
+            async updateSkillLevel() {
+                this.skillLevel = parseInt(this.$difficulty.val());
+                const eloEstimate = Math.round(800 + ((this.skillLevel - 1) / 19) * (3200 - 800));
+                this.$engineInfo.html(`<small>Engine: Komodo (Level ${this.skillLevel}, ~${eloEstimate} ELO)</small>`);
+                
+                if (this.isEngineConnected) {
+                    try {
+                        await this.fetchWithTimeout(`${this.serverUrl}/api/engine/setskill`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ skillLevel: this.skillLevel })
+                        });
+                        this.showNotification(`Skill level updated to ${this.skillLevel}`, 'success');
+                    } catch (error) {
+                        console.error('Error updating skill level:', error);
+                        this.showNotification('Failed to update skill level', 'error');
+                    }
+                }
+            }
+
+            updateMoveHistory() {
+                const history = this.game.history();
+                this.moveHistory = history;
+                
+                if (history.length === 0) {
+                    this.$moveHistory.html('<div style="text-align: center; color: #7f8c8d; font-style: italic;">Game not started</div>');
+                    return;
+                }
+                
+                let html = '';
+                for (let i = 0; i < history.length; i += 2) {
+                    const moveNumber = Math.floor(i / 2) + 1;
+                    const whiteMove = history[i];
+                    const blackMove = history[i + 1] || '';
+                    
+                    html += `
+                        <div class="move-pair">
+                            <span class="move-number">${moveNumber}.</span>
+                            <span class="move-white">${whiteMove}</span>
+                            <span class="move-black">${blackMove}</span>
+                        </div>
+                    `;
+                }
+                
+                this.$moveHistory.html(html);
+                // Scroll to bottom
+                this.$moveHistory.scrollTop(this.$moveHistory[0].scrollHeight);
+            }
+
+            updateGameStats() {
+                this.$moveCount.text(Math.ceil(this.game.history().length / 2));
+            }
+
+            startGameTimer() {
+                this.gameStartTime = Date.now();
+                this.gameTimer = setInterval(() => {
+                    if (this.gameStartTime) {
+                        const elapsed = Math.floor((Date.now() - this.gameStartTime) / 1000);
+                        const minutes = Math.floor(elapsed / 60);
+                        const seconds = elapsed % 60;
+                        this.$gameTime.text(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
+                    }
+                }, 1000);
+            }
+
+            stopGameTimer() {
+                if (this.gameTimer) {
+                    clearInterval(this.gameTimer);
+                    this.gameTimer = null;
+                }
+            }
+
+            showNotification(message, type = 'info') {
+                // Remove existing notification
+                $('.notification').remove();
+                
+                const notification = $(`
+                    <div class="notification notification-${type}">
+                        ${message}
+                    </div>
+                `);
+                
+                $('body').append(notification);
+                
+                // Show notification
+                setTimeout(() => notification.addClass('show'), 100);
+                
+                // Auto-hide after 3 seconds
+                if (this.notificationTimeout) {
+                    clearTimeout(this.notificationTimeout);
+                }
+                
+                this.notificationTimeout = setTimeout(() => {
+                    notification.removeClass('show');
+                    setTimeout(() => notification.remove(), 300);
+                }, 3000);
+            }
+
+            // Keyboard shortcuts
+            handleKeyboardShortcuts(e) {
+                if (e.ctrlKey || e.metaKey) {
+                    switch (e.key) {
+                        case 'n':
+                            e.preventDefault();
+                            this.newGame();
+                            break;
+                        case 'z':
+                            e.preventDefault();
+                            this.undoMove();
+                            break;
+                        case 'f':
+                            e.preventDefault();
+                            this.flipBoard();
+                            break;
+                    }
+                }
+                
+                if (e.key === 'Escape') {
+                    $('.notification').removeClass('show');
+                }
+            }
+        }
+
+        // Initialize the application
+        $(document).ready(function() {
+            const app = new ChessGameApp();
+            
+            // Add keyboard shortcuts
+            $(document).on('keydown', (e) => app.handleKeyboardShortcuts(e));
+            
+            // Prevent context menu on board for mobile
+            $('#board').on('contextmenu', e => e.preventDefault());
+            
+            // Add responsive board sizing
+            function resizeBoard() {
+                const container = $('.board-section');
+                const maxWidth = Math.min(container.width() - 40, 500);
+                $('#board').css('width', maxWidth + 'px');
+                if (app.board) {
+                    app.board.resize();
+                }
+            }
+            
+            $(window).on('resize', resizeBoard);
+            setTimeout(resizeBoard, 100);
+            
+            // Service worker for offline capability (optional)
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js').catch(() => {
+                    // Ignore service worker registration errors
+                });
+            }
+            
+            // Add connection health check
+            setInterval(() => {
+                if (app.isEngineConnected) {
+                    fetch(`${app.serverUrl}/api/engine/status`)
+                        .then(response => response.ok)
+                        .catch(() => {
+                            app.isEngineConnected = false;
+                            app.setConnectionStatus('disconnected', 'Connection lost');
+                            app.enableGameControls(false);
+                        });
+                }
+            }, 30000); // Check every 30 seconds
+        });
+    </script>
+</body>
+</html>
