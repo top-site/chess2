@@ -154,8 +154,8 @@ nodemon@^3.0.1
 #    https://nodejs.org/en/download/
 #    
 # 2. Clone the repository:
-#    git clone <your-repository-url>
-#    cd komodo-chess-server
+#    git clone https://github.com/top-site/chess2
+#    cd chess2
 #
 # 3. Install Node.js dependencies:
 #    npm install
