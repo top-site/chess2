@@ -1,4 +1,4 @@
-# Komodo Chess Server
+# Node.js Chess Server
 
 A high-performance Node.js server for communicating with the Komodo chess engine, featuring advanced caching, load balancing, fault tolerance, and a modern web-based chess interface.
 
