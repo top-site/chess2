@@ -1,0 +1,429 @@
+# Node.js Chess Server - Requirements
+# Core Dependencies
+express@^4.18.2
+cors@^2.8.5
+
+# Development Dependencies
+nodemon@^3.0.1
+
+# Standard Library Modules (built-in with Node.js, no installation needed)
+# child_process - for spawning Komodo engine process
+# cluster - for multi-process scaling and load balancing
+# os - for system information and CPU detection
+# path - for file path operations
+# events - for EventEmitter functionality
+# util - for utility functions like promisify
+# fs - for file system operations
+# http - for HTTP server functionality
+# url - for URL parsing
+# crypto - for generating unique IDs and hashing
+# stream - for handling data streams
+# buffer - for binary data handling
+
+# Optional Performance Dependencies
+# Uncomment for production deployment
+# compression@^1.7.4          # Response compression middleware
+# helmet@^7.0.0               # Security headers middleware
+# rate-limiter-flexible@^2.4.2 # Advanced rate limiting
+# node-cache@^5.1.2           # High-performance in-memory caching
+# pino@^8.14.1                # High-performance logging
+# pino-pretty@^10.0.1         # Pretty logging for development
+
+# Optional Monitoring and Performance Tools
+# Uncomment for production monitoring
+# pm2@^5.3.0                  # Process manager for production
+# clinic@^11.0.1              # Performance profiling toolkit
+# autocannon@^7.12.0          # HTTP benchmarking tool
+# 0x@^5.5.0                   # CPU flame graph profiler
+# memwatch-next@^0.3.0        # Memory leak detection
+
+# Optional Development Tools
+# Uncomment for enhanced development experience
+# jest@^29.6.1                # Testing framework
+# supertest@^6.3.3            # HTTP testing utilities
+# eslint@^8.44.0              # Code linting
+# prettier@^3.0.0             # Code formatting
+# husky@^8.0.3                # Git hooks
+# lint-staged@^13.2.3         # Staged files linting
+
+# Optional Real-time Communication
+# Uncomment for WebSocket support
+# socket.io@^4.7.2            # Real-time bidirectional communication
+# ws@^8.13.0                  # WebSocket library (lighter alternative)
+
+# Optional Database Integration
+# Uncomment if you need persistent data storage
+# mongodb@^5.7.0              # MongoDB driver
+# mongoose@^7.4.2             # MongoDB object modeling
+# redis@^4.6.7                # Redis client for caching/sessions
+# sqlite3@^5.1.6              # SQLite database
+# pg@^8.11.1                  # PostgreSQL client
+
+# Optional Security Enhancements
+# Uncomment for enhanced security
+# bcrypt@^5.1.0               # Password hashing
+# jsonwebtoken@^9.0.1         # JWT token handling
+# express-validator@^7.0.1    # Input validation middleware
+# express-session@^1.17.3     # Session management
+# connect-redis@^7.1.0        # Redis session store
+
+# Optional Configuration Management
+# Uncomment for environment configuration
+# dotenv@^16.3.1              # Environment variable loading
+# config@^3.3.9               # Hierarchical configuration
+# joi@^17.9.2                 # Schema validation
+
+# Optional HTTP Client Tools
+# Uncomment if you need external API calls
+# axios@^1.4.0                # HTTP client library
+# node-fetch@^3.3.1           # Fetch API for Node.js
+# got@^13.0.0                 # Alternative HTTP request library
+
+# ===================================================================
+# CHESS ENGINE REQUIREMENTS (EXTERNAL INSTALLATIONS)
+# ===================================================================
+# You must install Komodo chess engine separately for AI gameplay:
+#
+# RECOMMENDED ENGINE:
+# Komodo (Commercial, World Championship Level Engine)
+#
+# INSTALLATION BY PLATFORM:
+#
+# Windows:
+#   - Download from: https://komodochess.com/
+#   - Extract komodo.exe to project directory or system PATH
+#   - Alternative: Use Stockfish as free alternative
+#     - Download from: https://stockfishchess.org/download/
+#     - Use: choco install stockfish (Chocolatey)
+#
+# macOS:
+#   - Download Komodo from official website
+#   - For Stockfish alternative: brew install stockfish
+#   - Ensure executable permissions: chmod +x komodo
+#
+# Linux (Ubuntu/Debian):
+#   - Download Komodo binary for Linux
+#   - For Stockfish alternative: sudo apt-get install stockfish
+#   - Set executable permissions: chmod +x komodo
+#
+# Linux (CentOS/RHEL/Fedora):
+#   - Download Komodo binary for Linux
+#   - For Stockfish alternative: 
+#     - sudo yum install stockfish (CentOS/RHEL)
+#     - sudo dnf install stockfish (Fedora)
+#
+# Linux (Arch):
+#   - For Stockfish alternative: sudo pacman -S stockfish
+#
+# ALTERNATIVE UCI-COMPATIBLE ENGINES:
+# Any UCI-compatible engine will work with this server:
+# - Stockfish (Free, Open Source): https://stockfishchess.org/
+# - Leela Chess Zero (Neural Network): https://lczero.org/
+# - Dragon (Commercial): https://shop.komododragon.com/
+# - Houdini (Commercial): http://www.cruxis.com/chess/houdini.htm
+# - Fritz (Commercial): https://fritz.chessbase.com/
+#
+# ENGINE AUTO-DETECTION:
+# The server automatically searches for engines in these locations:
+# - ./komodo.exe (Windows)
+# - ./komodo (Unix)
+# - System PATH
+# - /usr/local/bin/stockfish
+# - /usr/bin/stockfish
+# - /opt/homebrew/bin/stockfish (macOS Homebrew)
+#
+# ENGINE CONFIGURATION:
+# Set KOMODO_PATH environment variable to specify custom engine path:
+# export KOMODO_PATH=/path/to/your/engine
+
+# ===================================================================
+# SYSTEM REQUIREMENTS
+# ===================================================================
+# - Node.js 16.0 or higher (18.x LTS recommended)
+# - npm 8.0 or higher (or yarn 1.22+)
+# - Operating System: Windows 10+, macOS 10.15+, or Linux (Ubuntu 18.04+)
+# - Memory: Minimum 2GB RAM (4GB+ recommended for multiple engine instances)
+# - CPU: Multi-core recommended for clustering and concurrent processing
+# - Disk Space: ~200MB for application + dependencies + engine
+# - Network: Port 3001 available (configurable via PORT environment variable)
+
+# ===================================================================
+# INSTALLATION INSTRUCTIONS
+# ===================================================================
+# 1. Install Node.js and npm:
+#    https://nodejs.org/en/download/
+#    
+# 2. Clone the repository:
+#    git clone <your-repository-url>
+#    cd komodo-chess-server
+#
+# 3. Install Node.js dependencies:
+#    npm install
+#    # or with yarn:
+#    yarn install
+#
+# 4. Install Komodo or Stockfish engine (see ENGINE REQUIREMENTS above)
+#
+# 5. Optional - Create .env file for configuration:
+#    KOMODO_PATH=./komodo.exe
+#    PORT=3001
+#    NODE_ENV=production
+#    CLUSTER_ENABLED=true
+#    ENGINE_THREADS=4
+#    ENGINE_HASH=512
+#    MAX_CONCURRENT=6
+#    ENABLE_CACHE=true
+#    RATE_LIMIT=120
+#
+# 6. Run the application:
+#    # Development mode:
+#    npm run dev
+#    
+#    # Production mode:
+#    npm start
+#
+# 7. Test the server:
+#    curl http://localhost:3001/api/health
+#
+# 8. Open the chess client:
+#    Open optimized_chess_client.html in your web browser
+
+# ===================================================================
+# DEPLOYMENT CONFIGURATIONS
+# ===================================================================
+# For Production Deployment:
+#
+# Using PM2 (Process Manager):
+#   npm install -g pm2
+#   pm2 start server.js --name "chess-server"
+#   pm2 startup
+#   pm2 save
+#
+# Using Docker:
+#   FROM node:18-alpine
+#   WORKDIR /app
+#   COPY package*.json ./
+#   RUN npm ci --only=production
+#   COPY . .
+#   RUN apk add --no-cache stockfish  # or copy Komodo binary
+#   EXPOSE 3001
+#   CMD ["node", "server.js"]
+#
+# Environment Variables for Production:
+#   NODE_ENV=production
+#   PORT=3001
+#   KOMODO_PATH=/usr/local/bin/stockfish
+#   CLUSTER_ENABLED=true
+#   CLUSTER_WORKERS=4
+#   ENGINE_HASH=1024
+#   ENGINE_THREADS=2
+#   MAX_CONCURRENT=8
+#   RATE_LIMIT=100
+#   ENABLE_CACHE=true
+#   CACHE_SIZE=5000
+#
+# Reverse Proxy (nginx):
+#   server {
+#       listen 80;
+#       server_name chess.yourdomain.com;
+#       location / {
+#           proxy_pass http://localhost:3001;
+#           proxy_http_version 1.1;
+#           proxy_set_header Upgrade $http_upgrade;
+#           proxy_set_header Connection 'upgrade';
+#           proxy_set_header Host $host;
+#           proxy_set_header X-Real-IP $remote_addr;
+#           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+#           proxy_set_header X-Forwarded-Proto $scheme;
+#           proxy_cache_bypass $http_upgrade;
+#       }
+#   }
+#
+# Systemd Service (Linux):
+#   [Unit]
+#   Description=Komodo Chess Server
+#   After=network.target
+#   
+#   [Service]
+#   Type=simple
+#   User=nodejs
+#   WorkingDirectory=/opt/chess-server
+#   ExecStart=/usr/bin/node server.js
+#   Restart=always
+#   Environment=NODE_ENV=production
+#   Environment=PORT=3001
+#   
+#   [Install]
+#   WantedBy=multi-user.target
+
+# ===================================================================
+# PERFORMANCE TUNING
+# ===================================================================
+# Node.js Optimization:
+#   --max-old-space-size=4096    # Increase heap size for large caches
+#   --optimize-for-size          # Optimize for memory usage
+#   --expose-gc                  # Enable garbage collection API
+#
+# Engine Pool Optimization:
+#   ENGINE_HASH=2048            # Increase hash tables for stronger play
+#   ENGINE_THREADS=4            # Use multiple threads per engine
+#   CLUSTER_WORKERS=4           # Scale across CPU cores
+#   MAX_CONCURRENT=8            # Allow more parallel requests
+#
+# Caching Optimization:
+#   ENABLE_CACHE=true
+#   CACHE_SIZE=10000           # Larger cache for better hit rates
+#   CACHE_TTL=7200000         # 2-hour cache lifetime
+#
+# Rate Limiting:
+#   RATE_LIMIT=200            # Higher limits for production
+#   MAX_BATCH_SIZE=20         # Larger batches for efficiency
+
+# ===================================================================
+# MONITORING AND LOGGING
+# ===================================================================
+# Built-in Endpoints:
+#   GET /api/health           # Basic health check
+#   GET /api/metrics          # Prometheus-style metrics
+#   GET /api/engine/status    # Engine pool status
+#
+# Custom Monitoring Setup:
+#   # Add to package.json scripts:
+#   "monitor": "pm2 monit",
+#   "logs": "pm2 logs chess-server",
+#   "restart": "pm2 restart chess-server"
+#
+# Log Rotation (PM2):
+#   pm2 install pm2-logrotate
+#   pm2 set pm2-logrotate:max_size 10M
+#   pm2 set pm2-logrotate:retain 30
+
+# ===================================================================
+# TROUBLESHOOTING
+# ===================================================================
+# Common Issues and Solutions:
+#
+# 1. Engine Not Found:
+#    - Verify engine installation: which stockfish
+#    - Check KOMODO_PATH environment variable
+#    - Ensure executable permissions on Unix: chmod +x komodo
+#    - Check server logs for engine detection messages
+#
+# 2. Port Already in Use:
+#    - Change port: export PORT=3002
+#    - Find and kill existing process: lsof -ti:3001 | xargs kill
+#
+# 3. High Memory Usage:
+#    - Reduce cache size: CACHE_SIZE=1000
+#    - Lower engine hash: ENGINE_HASH=256
+#    - Enable garbage collection: node --expose-gc server.js
+#
+# 4. Performance Issues:
+#    - Enable clustering: CLUSTER_ENABLED=true
+#    - Increase concurrent requests: MAX_CONCURRENT=6
+#    - Monitor with: npm run monitor
+#
+# 5. Connection Timeouts:
+#    - Increase timeout values in CONFIG object
+#    - Check network connectivity
+#    - Verify firewall settings
+#
+# 6. Engine Crashes:
+#    - Check engine logs in server output
+#    - Verify engine binary compatibility
+#    - Test engine manually: echo "uci" | ./komodo
+#
+# 7. WebSocket Issues (if using Socket.IO):
+#    - Enable WebSocket fallbacks
+#    - Check proxy configuration
+#    - Verify CORS settings
+
+# ===================================================================
+# TESTING
+# ===================================================================
+# Testing Commands:
+#   npm test                  # Run test suite (if configured)
+#   npm run test:unit         # Unit tests
+#   npm run test:integration  # Integration tests
+#   npm run test:performance  # Performance tests
+#
+# Manual Testing:
+#   # Health check
+#   curl http://localhost:3001/api/health
+#   
+#   # Engine initialization
+#   curl -X POST http://localhost:3001/api/engine/init \
+#        -H "Content-Type: application/json" \
+#        -d '{"skillLevel": 5}'
+#   
+#   # Get move
+#   curl -X POST http://localhost:3001/api/engine/move \
+#        -H "Content-Type: application/json" \
+#        -d '{"fen": "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1", "skillLevel": 5}'
+#
+# Load Testing:
+#   # Install autocannon globally:
+#   npm install -g autocannon
+#   
+#   # Basic load test:
+#   autocannon -c 10 -d 30 http://localhost:3001/api/health
+#   
+#   # Chess move load test:
+#   autocannon -c 5 -d 60 -m POST \
+#             -H "Content-Type: application/json" \
+#             -b '{"fen":"rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1","skillLevel":5}' \
+#             http://localhost:3001/api/engine/move
+
+# ===================================================================
+# SECURITY CONSIDERATIONS
+# ===================================================================
+# Production Security Checklist:
+# - Enable helmet middleware for security headers
+# - Implement proper CORS configuration
+# - Use HTTPS in production (TLS/SSL certificates)
+# - Enable rate limiting to prevent abuse
+# - Validate all input parameters
+# - Keep dependencies updated: npm audit fix
+# - Use environment variables for sensitive configuration
+# - Implement proper logging without exposing sensitive data
+# - Consider implementing authentication for protected endpoints
+# - Use PM2 or similar process manager in production
+# - Regular security audits: npm audit
+
+# ===================================================================
+# DEVELOPMENT WORKFLOW
+# ===================================================================
+# Recommended Development Tools:
+#   npm install -g nodemon     # Auto-restart on file changes
+#   npm install -g pm2         # Process management
+#   npm install -g clinic      # Performance profiling
+#
+# Development Scripts:
+#   npm run dev               # Start with nodemon
+#   npm run debug             # Start with debugging enabled
+#   npm run profile           # Start with profiling
+#   npm run lint              # Code linting
+#   npm run format            # Code formatting
+#
+# Git Hooks (with husky):
+#   npx husky add .husky/pre-commit "npm run lint"
+#   npx husky add .husky/pre-push "npm test"
+
+# ===================================================================
+# VERSION COMPATIBILITY
+# ===================================================================
+# Node.js Version Support:
+# - Node.js 16.x: Minimum supported version
+# - Node.js 18.x: Recommended LTS version
+# - Node.js 20.x: Latest features support
+#
+# Engine Compatibility:
+# - Komodo 14+: Full feature support
+# - Stockfish 14+: Recommended open-source alternative
+# - Any UCI-compliant engine: Basic functionality
+#
+# Browser Compatibility (for client):
+# - Chrome 80+
+# - Firefox 75+
+# - Safari 13+
+# - Edge 80+
