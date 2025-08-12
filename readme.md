@@ -375,8 +375,7 @@ npm run dev
 ```
 komodo-chess-server/
 ├── server.js                 # Main server application
-├── public/
-│   └── optimized_chess_client.html  # Web interface
+├── optimized_chess_client.html  # Web interface
 ├── package.json              # Dependencies and scripts
 ├── README.md                # Documentation
 ├── .env.example             # Environment template
