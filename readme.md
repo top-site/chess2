@@ -47,7 +47,7 @@ A high-performance Node.js server for communicating with the Komodo chess engine
 
 1. **Clone the repository**:
    ```bash
-   git clone <your-repository-url>
+   git clone https://github.com/top-site/chess2
    cd komodo-chess-server
    ```
 
